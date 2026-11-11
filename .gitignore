@@ -1,0 +1,13 @@
+# Secrets et configuration locale
+/.env
+/.env.*
+
+# Exception : modèle de configuration partageable
+!.env.example
+
+# Dépendances Composer
+/vendor/
+
+# Fichiers système
+.DS_Store
+Thumbs.db
