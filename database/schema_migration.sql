@@ -14,12 +14,14 @@ CREATE TABLE schema_migration (
     date_application DATETIME(6)
         NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
 
-    applique_par VARCHAR(288) NOT NULL,
+    applique_par VARCHAR(384) NOT NULL,
 
     PRIMARY KEY (id_migration),
 
     CONSTRAINT chk_schema_migration_sha256
-        CHECK (sha256_fichier REGEXP '^[0-9a-f]{64}$')
+        CHECK (
+            sha256_fichier REGEXP '^[0-9a-f]{64}$'
+        )
 
 ) ENGINE=InnoDB
   DEFAULT CHARSET=utf8mb4

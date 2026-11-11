@@ -26,7 +26,7 @@ CREATE TABLE schema_migration (
     date_application DATETIME(6)
         NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
 
-    applique_par VARCHAR(288) NOT NULL,
+    applique_par VARCHAR(384) NOT NULL,
 
     PRIMARY KEY (id_migration),
 
