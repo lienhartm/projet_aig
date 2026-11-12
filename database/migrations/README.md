@@ -20,20 +20,18 @@ La base métier concernée est `projet_aig`.
 
 ```text
 database/
-├── migrations/
-│   ├── bootstrap/
-│   │   └── 000_create_schema_migration.sql
-│   ├── imp/
-│   │   └── IMP_001_version_canonicalisation.sql
-│   └── README.md
-└── schema_migration.sql
+└── migrations/
+    ├── bootstrap/
+    │   └── 000_create_schema_migration.sql
+    ├── imp/
+    │   └── IMP_001_version_canonicalisation.sql
+    └── README.md
 ```
 
 ### Répertoires
 
 - `bootstrap/` : initialisation du mécanisme de suivi.
 - `imp/` : migrations du module d'import.
-- `schema_migration.sql` : copie documentaire de la structure de la table de suivi.
 
 Les futures migrations seront classées par domaine fonctionnel.
 
@@ -233,6 +231,17 @@ Lorsqu'une modification existe déjà dans MariaDB sans être enregistrée :
 
 Une réconciliation ne doit jamais être présentée comme une exécution du fichier SQL.
 
+Une migration peut être enregistrée selon deux situations distinctes :
+
+- **Migration exécutée** : le fichier SQL a effectivement été appliqué à la base de données après vérification des préconditions. Son empreinte SHA-256 correspond au fichier exécuté.
+- **Migration réconciliée** : les objets attendus étaient déjà présents dans la base et leur conformité avec le fichier de référence a été vérifiée. Le fichier SQL n'a pas été exécuté dans le cadre de cette réconciliation.
+
+Dans le second cas, l'empreinte SHA-256 enregistrée correspond à la version du fichier de référence utilisée pour effectuer le contrôle. Elle ne constitue pas une preuve de son exécution.
+
+La table `schema_migration` ne disposant pas d'une colonne dédiée au statut, la distinction entre exécution et réconciliation doit être explicitement portée par la description de l'enregistrement et par la documentation du projet.
+
+Une réconciliation ne permet pas de déterminer rétrospectivement l'origine des objets déjà présents lorsque celle-ci n'est pas documentée.
+
 ## 7. Historique initial
 
 ### 000_create_schema_migration
@@ -272,15 +281,27 @@ La colonne était déjà présente lors de la mise en place du suivi des migrati
 - Ne pas exécuter automatiquement les migrations sans contrôle préalable.
 - Conserver les sauvegardes selon la politique de conservation du projet.
 
+Les migrations applicatives et les opérations d'administration du serveur MariaDB doivent rester distinctes.
+
+Les migrations peuvent créer ou faire évoluer les objets du schéma applicatif et intégrer des données de référence nécessaires au fonctionnement de l'application.
+
+En revanche, les opérations d'administration des comptes et des privilèges MariaDB, notamment `CREATE USER`, `CREATE ROLE`, `GRANT`, `REVOKE` et `ALTER USER`, doivent être gérées au moyen de procédures administratives séparées.
+
+Ces opérations doivent faire l'objet d'une justification, d'une vérification des privilèges concernés et d'une exécution explicite par une personne habilitée.
+
+Les scripts d'administration ne doivent donc pas être intégrés au répertoire des migrations applicatives. Les identifiants et secrets d'authentification ne doivent jamais être stockés dans les scripts versionnés.
+
 ## 9. État du dispositif
 
 À la date du 12 novembre 2026 :
 
 - table `schema_migration` créée ;
-- bootstrap enregistré ;
-- migration IMP-001 réconciliée ;
+- migration bootstrap exécutée et enregistrée ;
+- migration IMP-001 réconciliée et enregistrée ;
 - empreintes SHA-256 contrôlées ;
 - organisation des répertoires définie ;
-- procédure MIG-P01 à MIG-P10 validée.
+- règles MIG-P01 à MIG-P10 validées.
 
-Les migrations suivantes devront respecter intégralement cette procédure.
+La gestion des migrations repose actuellement sur une procédure manuelle et contrôlée. Aucun mécanisme d'exécution automatique des migrations n'est considéré comme faisant partie du dispositif opérationnel établi à cette date.
+
+Toute évolution vers une automatisation devra faire l'objet d'une décision et d'une validation spécifiques.

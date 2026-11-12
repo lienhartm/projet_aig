@@ -108,6 +108,19 @@ final class Authorization
         }
     }
 
+	public function getAuthenticatedUserId(): int
+	{
+	    $this->requireAuthenticated();
+
+	    if (!$this->isAccountActive()) {
+		throw new AuthorizationException(
+		    'Le compte utilisateur est désactivé.'
+		);
+	    }
+
+	    return (int) $this->userContext['id_utilisateur'];
+	}
+
     public function hasRole(string $role): bool
     {
         if (
